@@ -36,6 +36,8 @@ role 只允许 user/assistant。date 是实际来源时间，不是采集时刻�
 
 实际事项至少应有一个有证据节点。date 必须等于合并后该事项最新相关节点时间；补历史不回退摘要。related 只引用已存在或同批新增的事项 ID。type 必须在用户配置内，用户 overrides 优先。nodes 按日期排序；脚本按 ID 保留历史节点，decisions 和 terms 追加去重。分支、关联等其他数组由完整 upsert 保留。
 
+summary 面向卡片和详情开头，先写当前结果与停点，通常两三句话；recap 承接背景与历史取舍，可用换行分段。具体整理方法以 curation.md 为准。不要把 summary 当作每批追加的日志，不通过前端截断替代整理，也不把一条最新消息自动当成整个事项的状态。
+
 ## node 与 decision
 
 ```json

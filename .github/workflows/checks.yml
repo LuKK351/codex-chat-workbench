@@ -19,6 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node scripts/reading_ui_test.cjs
       - run: node scripts/readable_test.cjs
       - run: node scripts/search_coverage_test.cjs
       - run: python -B scripts/launcher_test.py

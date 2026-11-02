@@ -300,3 +300,36 @@ h1,h2,h3,.node strong,.source-shortcut,.workline,.match-node,.detail-recap {over
 /* Search coverage stays separate from the user-selected time filter. */
 .search-scope{margin:14px 0 20px;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--light);font-size:13px;line-height:1.8}
 .search-scope p{margin:0}.search-scope strong{font-weight:600;font-variant-numeric:tabular-nums}.search-scope .textbtn{color:var(--accent);padding:0 6px;min-height:28px}
+
+/* Desktop refinement: keep the objects ahead of repeated explanations. */
+@media(min-width:851px){
+  .hero.compact{min-height:64px;margin-bottom:14px}
+  .tabs{margin-top:8px;margin-bottom:10px}
+  .time-filter{display:grid;grid-template-columns:72px minmax(0,1fr);column-gap:12px;row-gap:3px;padding:4px 0 10px;margin-bottom:7px}
+  .filter-heading{display:contents}
+  .filter-heading strong{grid-column:1;grid-row:1;align-self:center}
+  .filter-heading span{grid-column:2;grid-row:2;line-height:20px}
+  .time-options.filters{grid-column:2;grid-row:1}
+  .type-filters{display:flex;align-items:center;gap:6px;padding:3px 0 5px}
+  .type-filters>span:first-child{flex:0 0 78px;margin:0;color:var(--ink);font-weight:600;font-size:13px}
+  .sectionhead{margin-top:14px}
+}
+/* A short current summary leads; background and evidence keep their full text. */
+.background p{white-space:pre-line;line-height:1.9}
+.decision-history{margin:18px 0 24px;padding:0;border:0}
+.decision-heading{display:flex;align-items:baseline;gap:14px;margin-bottom:10px}
+.decision-heading h2{font-size:16px;margin:0}
+.decision-heading>.muted{font-size:12px}
+.decision-history .decisions{margin:0;padding:8px 20px}
+.earlier-decisions{border:0;border-top:1px solid var(--line);padding:0;margin:0}
+.earlier-decisions>summary{padding:12px 0;font-size:13px;color:var(--accent)}
+.earlier-decisions[open]>summary{border-bottom:1px solid var(--line)}
+.source-return{position:sticky;top:12px;z-index:8;display:flex;align-items:center;gap:24px;min-height:56px;padding:12px 18px;margin:0 0 22px;background:#fdfef9f5;border:1px solid var(--line);border-radius:10px;box-shadow:0 4px 16px #28371508;backdrop-filter:blur(10px)}
+.source-return>a{flex-shrink:0;min-height:30px;font-size:14px;color:var(--accent)}
+.source-return-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;color:var(--muted)}
+.transcript-message{scroll-margin-top:96px}
+.transcript-message:focus{outline:none}
+.transcript-message:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+
+/* Source context stays on its own line even when duplicate evidence is omitted. */
+.match-node>small{display:block;margin-top:6px}
