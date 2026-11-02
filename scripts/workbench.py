@@ -135,6 +135,11 @@ def validate(data):
     if data.get('collectionCutoff') and data.get('organizedAt'):
         require(date(data['collectionCutoff']) <= date(data['organizedAt']), '读取截止时间不能晚于整理时间')
     zone = load_timezone(data.get('timezone', 'Asia/Shanghai'))
+    if 'collectionStart' in data:
+        start = dt.date.fromisoformat(data['collectionStart'])
+        require(start.isoformat() == data['collectionStart'], '收录起点必须为 YYYY-MM-DD')
+        if data.get('collectionCutoff'):
+            require(start <= date(data['collectionCutoff']).astimezone(zone).date(), '读取截止不能早于收录起点')
     types = indexed(data['types'], 'types')
     threads = indexed(data['threads'], 'threads')
     items = indexed(data['items'] + data.get('legacyItems', []), 'items')
@@ -220,7 +225,11 @@ def merge_rows(old, new, label):
 def config_types(root, data):
     settings = root / 'config/workbench.json'
     if settings.exists():
-        data['timezone'] = read(settings)['timezone']
+        settings_data = read(settings)
+        data['timezone'] = settings_data['timezone']
+        # Public scope metadata comes from the fixed initial authorization, never message extrema.
+        if settings_data.get('initialRange', {}).get('start'):
+            data.setdefault('collectionStart', settings_data['initialRange']['start'])
     cfg = read(root / 'config/default-types.json')
     data['types'] = cfg['types'] + [cfg['unclassified']]
     ids = set(indexed(data['types'], 'types'))
@@ -259,6 +268,9 @@ def prepare(root, batchpath, destination):
     for key in ('snapshot', 'checked', 'scopeDescription', 'organizedAt', 'collectionCutoff'):
         if key in batch:
             data[key] = batch[key]
+    previous_cutoff = json.loads(original).get('collectionCutoff')
+    if previous_cutoff and data.get('collectionCutoff'):
+        require(date(data['collectionCutoff']) >= date(previous_cutoff), '累计读取截止不能倒退；补录旧内容请沿用既有截止时间')
     require(date(data['snapshot']) >= date(json.loads(original)['snapshot']), '快照时间不能倒退')
     config_types(root, data)
     if data != json.loads(original) and 'organizedAt' not in batch:

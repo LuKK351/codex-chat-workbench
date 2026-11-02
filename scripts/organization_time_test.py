@@ -49,6 +49,25 @@ class OrganizationTimeTests(unittest.TestCase):
         self.assertEqual(data['organizedAt'], '2026-10-30T00:07:55Z')
         self.assertEqual(data['collectionCutoff'], '2026-10-30T08:05:06+08:00')
 
+    def test_cumulative_range_advances_without_new_messages_and_never_slides(self):
+        for cutoff in ('2026-01-30T08:00:00+08:00', '2026-01-31T08:00:00+08:00', '2026-02-01T08:00:00+08:00'):
+            candidate, data = self.prepare(collectionCutoff=cutoff)
+            self.assertEqual(data['collectionStart'], '2026-01-01')
+            self.assertEqual(data['collectionCutoff'], cutoff)
+            self.assertEqual(data['threads'], [])
+            w.publish(self.root, candidate)
+        with self.assertRaisesRegex(ValueError, '累计读取截止不能倒退'):
+            self.prepare(collectionCutoff='2026-01-30T08:00:00+08:00')
+        _, data = self.prepare(scopeDescription='Backfill without changing cumulative end')
+        self.assertEqual(data['collectionCutoff'], '2026-02-01T08:00:00+08:00')
+
+    def test_legacy_scope_migrates_from_initial_config_not_message_dates(self):
+        data = w.read(self.root/'data.json')
+        del data['collectionStart']
+        w.atomic(self.root/'data.json', w.encode(data))
+        _, candidate = self.prepare(collectionCutoff='2026-02-01T00:00:00Z')
+        self.assertEqual(candidate['collectionStart'], '2026-01-01')
+
     def test_date_only_unzoned_or_reversed_timestamps_are_rejected(self):
         original = (self.root/'data.json').read_bytes()
         for fields in ({'organizedAt':'2026-10-30'}, {'collectionCutoff':'2026-10-30T08:05:06'},

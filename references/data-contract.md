@@ -12,6 +12,7 @@
 - `dailySummaries`: `{"YYYY-MM-DD|事项ID":"当天变化"}`，仅对应日期确有节点才允许。
 - `snapshot`: 兼容旧版的整理日期 YYYY-MM-DD，不能比原快照早。
 - `organizedAt`: 含时区的 ISO 具体时间；prepare 在候选内容发生变化时自动记录，表示这一版整理内容生成的时间。无变化重试不刷新。界面按工作台时区显示到分钟。旧记录无此字段时显示“时间未记录”，不补造 00:00。
+- `collectionStart`: 首次授权收录的起始日期（YYYY-MM-DD），由 initialize 写入，旧版由 prepare 从 config/workbench.json 的 initialRange.start 补齐。常规更新保留该起点，不按消息最早日期或滚动近一个月重算。搜索页以此起点和 collectionCutoff 在工作台时区对应的日期展示累计收录时间范围；范围不代表其中所有窗口均已收全，缺口仍须披露。
 - `collectionCutoff`: 含时区的本轮读取上界，通常是本轮开始时刻；不是所有窗口均已收全的承诺，具体缺口仍在 scopeDescription/进度清单说明。不可晚于 organizedAt。补录旧范围时如没有新的读取上界，沿用既有值。
 - 历史时间修复只能依据匹配当前数据哈希的发布记录等证据显式提供 organizedAt；不能用重启服务、网页刷新或文件修改时间冒充整理时间。
 - `checked`: 用户可读的累计采集日期范围。

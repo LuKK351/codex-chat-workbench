@@ -25,6 +25,7 @@ def initialize(destination, since, until, timezone, port=8770):
     (destination / 'config/workbench.json').write_text(json.dumps(settings, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     data = json.loads((destination / 'data.json').read_text(encoding='utf-8'))
     data['timezone'] = timezone
+    data['collectionStart'] = since
     data['snapshot'] = dt.datetime.now(zone).date().isoformat()
     data['scopeDescription'] = f'尚未收录。首次计划范围：{since}—{until}（{timezone}）。'
     (destination / 'data.json').write_text(json.dumps(data, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')

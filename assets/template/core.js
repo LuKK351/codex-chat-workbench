@@ -19,6 +19,10 @@
  const coverageCache=new WeakMap();
  function searchCoverage(data){
   const cached=coverageCache.get(data);if(cached?.zone===ZONE)return cached.value;
+  if(data.collectionStart&&data.collectionCutoff){
+   const value={start:data.collectionStart,end:dayKey(data.collectionCutoff),unknown:false,source:'collection',cutoff:data.collectionCutoff};
+   coverageCache.set(data,{zone:ZONE,value});return value;
+  }
   let start=null,end=null,unknown=false;
   function include(entry){
    if(!entry.date||entry.timePrecision?.includes('消息时间缺失')){unknown=true;return;}

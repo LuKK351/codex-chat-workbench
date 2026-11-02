@@ -90,8 +90,8 @@ function icon(name){const shapes={search:'<circle cx="10.5" cy="10.5" r="6.5"/><
 function fav(t,compact=false){const saved=favorites.has(t.id);return `<button class="favorite ${saved?'on':''}" data-favorite="${t.id}" aria-pressed="${saved}" title="${saved?'取消收藏':'收藏'}" aria-label="${saved?'取消收藏':'收藏'}：${esc(t.title)}">${icon('star')}${compact?'':saved?' 已收藏':' 收藏'}</button>`;}
 function searchScopeNote(){
  const coverage=C.searchCoverage(data);
- const range=coverage.start?`已收录内容的日期范围：<strong>${esc(C.date(coverage.start))} 至 ${esc(C.date(coverage.end))}</strong>。`:'目前没有日期明确的已收录内容。';
- return `<aside class="search-scope" aria-label="搜索收录范围"><p>仅搜索已收录的讨论。${range}</p><p class="muted">未收录的内容不会出现在结果中。${coverage.unknown?'部分原文日期未知，未计入上述范围。':''}<button class="textbtn" data-about>查看收录情况</button></p></aside>`;
+ const range=coverage.start?`${coverage.source==='collection'?'收录时间范围':'已收录消息的日期（收录范围未记录）'}：<strong>${esc(C.date(coverage.start))} 至 ${esc(C.date(coverage.end))}</strong>。`:'目前没有日期明确的已收录内容。';
+ return `<aside class="search-scope" aria-label="搜索收录范围"><p>仅搜索已收录的讨论。${range}</p><p class="muted">${coverage.cutoff?'本轮读取截止：'+esc(C.dateTime(coverage.cutoff))+'（'+esc(C.timeZoneLabel())+'）。':''}未收录的内容不会出现在结果中。${coverage.unknown?'部分原文日期未知，未计入上述范围。':''}<button class="textbtn" data-about>查看收录情况</button></p></aside>`;
 }
 function searchForm(q=''){return `<form class="search" id="search"><span class="search-icon">${icon('search')}</span><input name="q" aria-label="搜索聊过的内容" placeholder="搜索全部讨论，输入关键词或一句描述" value="${esc(q)}" maxlength="300"><button class="primary">搜索</button></form>`;}
 function tabs(tab){return `<nav class="tabs" aria-label="主要导航">${[['all','事情总览'],['tasks','可以接着做'],['time','每日回顾'],['favorites','收藏']].map(([v,n])=>`<a class="tab ${v===tab?'active':''}" ${v===tab?'aria-current="page"':''} href="${link({tab:v})}">${n}${v==='favorites'&&favorites.size?` <small>${favorites.size}</small>`:''}</a>`).join('')}</nav>`;}
