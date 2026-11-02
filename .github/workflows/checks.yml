@@ -20,6 +20,7 @@ jobs:
         with:
           node-version: '22'
       - run: node scripts/readable_test.cjs
+      - run: node scripts/search_coverage_test.cjs
       - run: python -B scripts/launcher_test.py
       - run: python -B scripts/self_test.py
       - run: python -B scripts/date_consistency_test.py

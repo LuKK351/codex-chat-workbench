@@ -296,3 +296,7 @@ h1,h2,h3,.node strong,.source-shortcut,.workline,.match-node,.detail-recap {over
 .message-table tr:last-child td{border-bottom:0}.message-table th:last-child,.message-table td:last-child{border-right:0}
 .message-table .align-left{text-align:left}.message-table .align-center{text-align:center}.message-table .align-right{text-align:right}
 @media(max-width:600px){.message-table th,.message-table td{padding:10px 12px;min-width:150px}}
+
+/* Search coverage stays separate from the user-selected time filter. */
+.search-scope{margin:14px 0 20px;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--light);font-size:13px;line-height:1.8}
+.search-scope p{margin:0}.search-scope strong{font-weight:600;font-variant-numeric:tabular-nums}.search-scope .textbtn{color:var(--accent);padding:0 6px;min-height:28px}

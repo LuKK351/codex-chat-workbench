@@ -16,6 +16,22 @@
  }
  function inRange(v,range,now=new Date().toISOString()){const bounds=rangeBounds(range,now),day=dayKey(v);if(bounds)return day>=bounds.start&&day<=bounds.end;if(range==='older')return (Date.parse(dayKey(now))-Date.parse(day))/86400000>=30;return true;}
 
+ const coverageCache=new WeakMap();
+ function searchCoverage(data){
+  const cached=coverageCache.get(data);if(cached?.zone===ZONE)return cached.value;
+  let start=null,end=null,unknown=false;
+  function include(entry){
+   if(!entry.date||entry.timePrecision?.includes('消息时间缺失')){unknown=true;return;}
+   let day;try{day=dayKey(entry.date);}catch{unknown=true;return;}
+   if(!/^\d{4}-\d{2}-\d{2}$/.test(day)){unknown=true;return;}
+   if(start===null||day<start)start=day;if(end===null||day>end)end=day;
+  }
+  // Include searchable raw messages and legacy nodes, not just the current summaries.
+  for(const thread of data.threads||[])for(const message of thread.messages||[])include(message);
+  for(const item of [...(data.items||[]),...(data.legacyItems||[])])for(const node of item.nodes||[])include(node);
+  const value={start,end,unknown};coverageCache.set(data,{zone:ZONE,value});return value;
+ }
+
  function date(v){return asDate(v).toLocaleDateString('zh-CN',{timeZone:typeof v==='string'&&v.length===10?'UTC':ZONE,year:'numeric',month:'2-digit',day:'2-digit'});}
  function clock(v){return typeof v==='string'&&v.length===10?'时间未记录':asDate(v).toLocaleTimeString('zh-CN',{timeZone:ZONE,hour12:false,hour:'2-digit',minute:'2-digit'});}
 
@@ -219,5 +235,5 @@
  }
  function plainExcerpt(text){return String(text||'').replace(/!\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/\[([^\]]+)\]\((?:<[^>]*>|[^)])*\)/g,'$1').replace(/(?:\/Users\/|\/private\/)[^\s<>]+/g,'[本地文件路径]').replace(/https?:\/\/[^\s<>]+/g,'[链接]').replace(/\*\*|__|`+/g,'').replace(/^\s{0,3}#{1,6}\s+/gm,'').replace(/\s+/g,' ').trim();}
  function eventSummary(n){const text=String(n.event||'').replace(/[；，。]?具体说法见下方原话[。]?/g,'').trim();return text.replace(/[。；]$/,'')===String(n.title).replace(/[。；]$/,'')?'':text;}
- const api={setTimeZone,asDate,dayKey,age,relative,inRange,rangeBounds,date,clock,dateTime,timeZoneLabel,words,matches,nearby,parseQuery,queryTokens,dailyGroups,searchData,excerpts,plainExcerpt,eventSummary};if(typeof module==='object')module.exports=api;else root.Workbench=api;
+ const api={searchCoverage,setTimeZone,asDate,dayKey,age,relative,inRange,rangeBounds,date,clock,dateTime,timeZoneLabel,words,matches,nearby,parseQuery,queryTokens,dailyGroups,searchData,excerpts,plainExcerpt,eventSummary};if(typeof module==='object')module.exports=api;else root.Workbench=api;
 })(typeof window!=='undefined'?window:globalThis);
