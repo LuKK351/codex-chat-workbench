@@ -305,7 +305,7 @@ h1,h2,h3,.node strong,.source-shortcut,.workline,.match-node,.detail-recap {over
 @media(min-width:851px){
   .hero.compact{min-height:64px;margin-bottom:14px}
   .tabs{margin-top:8px;margin-bottom:10px}
-  .time-filter{display:grid;grid-template-columns:72px minmax(0,1fr);column-gap:12px;row-gap:3px;padding:4px 0 10px;margin-bottom:7px}
+  .time-filter{display:grid;grid-template-columns:72px minmax(0,1fr);column-gap:12px;row-gap:10px;padding:4px 0 10px;margin-bottom:7px}
   .filter-heading{display:contents}
   .filter-heading strong{grid-column:1;grid-row:1;align-self:center}
   .filter-heading span{grid-column:2;grid-row:2;line-height:20px}
@@ -320,7 +320,7 @@ h1,h2,h3,.node strong,.source-shortcut,.workline,.match-node,.detail-recap {over
 .decision-heading{display:flex;align-items:baseline;gap:14px;margin-bottom:10px}
 .decision-heading h2{font-size:16px;margin:0}
 .decision-heading>.muted{font-size:12px}
-.decision-history .decisions{margin:0;padding:8px 20px}
+.decision-history .decisions{margin:0;padding:0}
 .earlier-decisions{border:0;border-top:1px solid var(--line);padding:0;margin:0}
 .earlier-decisions>summary{padding:12px 0;font-size:13px;color:var(--accent)}
 .earlier-decisions[open]>summary{border-bottom:1px solid var(--line)}
@@ -333,3 +333,9 @@ h1,h2,h3,.node strong,.source-shortcut,.workline,.match-node,.detail-recap {over
 
 /* Source context stays on its own line even when duplicate evidence is omitted. */
 .match-node>small{display:block;margin-top:6px}
+
+/* Keep the time basis beside its options when the desktop has room. */
+@media(min-width:1200px){
+  .time-filter{grid-template-columns:72px max-content minmax(0,1fr);align-items:center}
+  .filter-heading span{grid-column:3;grid-row:1;justify-self:end;margin-left:16px}
+}
