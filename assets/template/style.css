@@ -343,3 +343,10 @@ h1,h2,h3,.node strong,.source-shortcut,.workline,.match-node,.detail-recap {over
 /* Keep the discussion source distinct from local reading actions. */
 .reader>.source-line{margin-top:24px}
 .reader>.actions{margin-top:18px}
+
+/* Every raw-source route offers a distinct way back to the native conversation. */
+.source-result-head,.source-index-card{display:flex;align-items:flex-start;gap:20px}
+.source-result-head>h3,.source-index-content{flex:1;min-width:0}
+.source-open{flex:none;white-space:nowrap;gap:5px}
+.source-return-title{flex:1}
+.source-return>.source-open{margin-left:auto;font-size:13px;min-height:36px}

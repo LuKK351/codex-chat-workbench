@@ -56,4 +56,28 @@ node.thread='export-without-uuid';
 sandbox.detail({item:'matter',node:'entry'});
 assert.ok(!app.innerHTML.includes('codex://threads/'));
 assert.match(app.innerHTML,/来源对话<\/span><span>窗口 &lt;测试&gt;<\/span>/);
-console.log('PASS search evidence, decisions, source-return routes, and detail source links with safe export fallback');
+// Raw-only search results and deep transcript positions must offer the same native route.
+const rawThread={id:threadId,title:'议题讨论 <写作>',date:node.date,checked:'2026-11-03',messages:[{id:'raw-hit',role:'user',date:node.date,text:'为什么还需要练习个人写作'}]};
+sandbox.fixture={items:[],legacyItems:[],threads:[rawThread],snapshot:'2026-11-03'};
+vm.runInContext('data=fixture',sandbox);
+sandbox.search({q:'个人写作',range:'any',back:'#tab=all'});
+assert.match(app.innerHTML,/0 件相关事情/);
+assert.match(app.innerHTML,/阅读前后文/);
+assert.ok(app.innerHTML.includes(`href="codex://threads/${threadId}"`));
+assert.match(app.innerHTML,/message=raw-hit/);
+sandbox.sourceReader({thread:threadId,message:'raw-hit',back:'#q=个人写作&range=any'});
+assert.ok(app.innerHTML.slice(0,app.innerHTML.indexOf('</nav>')).includes(`href="codex://threads/${threadId}"`));
+assert.match(app.innerHTML,/返回搜索结果/);
+assert.match(app.innerHTML,/id="message-raw-hit"[^>]*class="transcript-message target"/);
+sandbox.sourceIndex({sources:'1'});
+assert.ok(app.innerHTML.includes(`href="codex://threads/${threadId}"`));
+assert.match(app.innerHTML,/href="#thread=00000000/);
+// Imported sources without an authentic thread UUID retain local reading only.
+sandbox.fixture={...sandbox.fixture,threads:[{...rawThread,id:'export-file'}]};
+vm.runInContext('data=fixture',sandbox);
+for(const render of [()=>sandbox.search({q:'个人写作'}),()=>sandbox.sourceReader({thread:'export-file'}),()=>sandbox.sourceIndex({sources:'1'})]){
+ render();assert.ok(!app.innerHTML.includes('codex://'));assert.ok(app.innerHTML.includes('议题讨论'));
+}
+assert.equal(sandbox.sourceOpenLink('javascript:alert(1)','bad'),'');
+assert.match(sandbox.sourceOpenLink(threadId,'窗口 <测试>'),/aria-label="在 Codex 打开：窗口 &lt;测试&gt;"/);
+console.log('PASS reading routes, raw-only search, sticky native shortcut, message targeting, and safe export fallback');
