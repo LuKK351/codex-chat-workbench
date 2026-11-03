@@ -339,3 +339,7 @@ h1,h2,h3,.node strong,.source-shortcut,.workline,.match-node,.detail-recap {over
   .time-filter{grid-template-columns:72px max-content minmax(0,1fr);align-items:center}
   .filter-heading span{grid-column:3;grid-row:1;justify-self:end;margin-left:16px}
 }
+
+/* Keep the discussion source distinct from local reading actions. */
+.reader>.source-line{margin-top:24px}
+.reader>.actions{margin-top:18px}
