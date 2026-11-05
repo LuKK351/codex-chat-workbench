@@ -130,9 +130,11 @@
   for(const t of data.threads||[]){
    const all=t.messages.filter((m,i)=>!(t.inheritedPrefix&&i<t.inheritedPrefix.messages)&&matches(m.text,terms));rawCount+=all.length;
    const messages=all.filter(m=>!represented.has(t.id+':'+m.id)).sort((a,b)=>Number(nearby(b.text,terms))-Number(nearby(a.text,terms))||b.date.localeCompare(a.date));
-   const titleMatch=matches(t.title,terms);if(messages.length||titleMatch)sourceGroups.push({thread:t,messages,titleMatch});
+   const name=compact(t.title),query=compact(q);
+   const titleRank=query?(name===query?3:name.includes(query)?2:matches(t.title,terms)?1:0):0;
+   const titleMatch=titleRank>0;if(messages.length||titleMatch)sourceGroups.push({thread:t,messages,titleMatch,titleRank});
   }
-  sourceGroups.sort((a,b)=>Number(b.titleMatch)-Number(a.titleMatch)||a.thread.title.localeCompare(b.thread.title,'zh-CN'));
+  sourceGroups.sort((a,b)=>b.titleRank-a.titleRank||a.thread.title.localeCompare(b.thread.title,'zh-CN'));
   const result={terms,groups:[...groups.values()].sort((a,b)=>b.tier-a.tier||b.score-a.score||b.thing.date.localeCompare(a.thing.date)),sources:sourceGroups,rawCount,represented};
   result.suggestions=terms.length&&result.groups.filter(g=>g.tier===2).length<3?suggestions(index,q,new Set(groups.keys())):[];
   if(index.cache.size>=40)index.cache.delete(index.cache.keys().next().value);index.cache.set(cacheKey,result);return result;

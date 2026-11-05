@@ -80,4 +80,35 @@ for(const render of [()=>sandbox.search({q:'个人写作'}),()=>sandbox.sourceRe
 }
 assert.equal(sandbox.sourceOpenLink('javascript:alert(1)','bad'),'');
 assert.match(sandbox.sourceOpenLink(threadId,'窗口 <测试>'),/aria-label="在 Codex 打开：窗口 &lt;测试&gt;"/);
-console.log('PASS reading routes, raw-only search, sticky native shortcut, message targeting, and safe export fallback');
+// A remembered window name must be visible before topic, fuzzy, and quote-only results.
+const query='Codex 对话整理工作台';
+const namedThread={...rawThread,title:query+'｜内容创作',messages:[{...rawThread.messages[0],text:'已保存封面底板'}]};
+const exactThread={...rawThread,id:'00000000-0000-4000-8000-000000000002',title:query,messages:[{...rawThread.messages[0],id:'exact',text:'确认布局'}]};
+const scatteredThread={...rawThread,id:'00000000-0000-4000-8000-000000000003',title:'Codex 使用记录与对话整理工作台',messages:[{...rawThread.messages[0],id:'scattered',text:'整理记录'}]};
+const quoteNode={...node,thread:threadId,sourceTitle:namedThread.title,quote:query,title:'保存底板'};
+const quoteThing={...item,id:'video',title:'制作分享视频',summary:'已保存封面',date:node.date,decisions:[],nodes:[quoteNode]};
+const topicThing={...quoteThing,id:'design',title:'设计 '+query,nodes:[{...quoteNode,id:'design-node',messageId:'design-message'}]};
+// Give the quote its own source message, while the window's other text does not match at all.
+namedThread.messages.push({id:quoteNode.messageId,role:'user',date:node.date,text:query});
+sandbox.fixture={items:[quoteThing,topicThing],threads:[scatteredThread,namedThread,exactThread],snapshot:'2026-11-03'};
+vm.runInContext('data=fixture',sandbox);
+const ranked=C.searchData(sandbox.fixture,query,undefined,'any');
+assert.deepEqual(ranked.sources.filter(s=>s.titleMatch).map(s=>s.thread.id),[exactThread.id,namedThread.id,scatteredThread.id]);
+assert.equal(ranked.groups.find(g=>g.thing.id==='video').tier,1); // A broad window title cannot promote every topic within it.
+sandbox.search({q:query,range:'any'});
+const nameStart=app.innerHTML.indexOf('<section class="name-results"'),nameEnd=app.innerHTML.indexOf('</section>',nameStart);
+assert.ok(nameStart>=0 && nameStart<app.innerHTML.indexOf('class="result search-group"'));
+const nameHtml=app.innerHTML.slice(nameStart,nameEnd);
+assert.ok(nameHtml.includes('codex://threads/'+threadId));
+assert.ok(nameHtml.includes('href="#thread='+threadId));
+assert.ok(!nameHtml.includes('class="matched-nodes" open')); // Only messages collapse; window links remain visible.
+assert.ok(!app.innerHTML.slice(nameEnd).includes('class="source-result-head"')); // Named windows are not repeated in the lower raw-results section.
+assert.ok(!app.innerHTML.includes('仅在原话中提及'));
+// Name-only hits work even with no matching messages or curated matters, including spacing/case.
+sandbox.fixture={items:[],threads:[exactThread],snapshot:'2026-11-03'};
+vm.runInContext('data=fixture',sandbox);
+sandbox.search({q:'ＣＯＤＥＸ对话整理工作台',range:'any'});
+assert.ok(app.innerHTML.includes('class="name-results"'));
+assert.ok(!app.innerHTML.includes('没有找到匹配的内容'));
+assert.equal(C.searchData(sandbox.fixture,query,'2026-11-05T12:00:00+08:00','today').sources.length,0); // Date filters still apply.
+console.log('PASS name-first search ranking, name-only/date scope, reading routes, raw-only search, sticky native shortcut, message targeting, and safe export fallback');

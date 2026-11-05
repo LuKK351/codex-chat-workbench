@@ -350,3 +350,12 @@ h1,h2,h3,.node strong,.source-shortcut,.workline,.match-node,.detail-recap {over
 .source-open{flex:none;white-space:nowrap;gap:5px}
 .source-return-title{flex:1}
 .source-return>.source-open{margin-left:auto;font-size:13px;min-height:36px}
+
+/* Name matches are direct navigation results, visible before topic and text matches. */
+.name-results{margin:24px 0 28px}
+.name-results>h2{font-size:15px;margin:0 0 12px}
+.name-results>h2>.muted{font-size:13px;font-weight:400}
+.name-results .result{padding:18px 22px}
+.name-results .source-result-head{align-items:center}
+.name-results h3{margin:0}
+.name-results .matched-nodes{margin-top:14px}
