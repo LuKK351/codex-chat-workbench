@@ -68,7 +68,7 @@ assets/template/         不含个人记录的绿色网页模板
 requirements.txt         时区数据依赖
 ```
 
-遇到问题可在 [Issues](https://github.com/LuKK351/lukk-codex-workbench/issues) 描述操作系统、操作步骤和错误提示。提交前去掉私人对话、路径中的个人信息及凭据，不上传完整个人工作台。
+遇到问题可在 [Issues](https://github.com/LuKK351/codex-chat-workbench/issues) 描述操作系统、操作步骤和错误提示。提交前去掉私人对话、路径中的个人信息及凭据，不上传完整个人工作台。
 
 ## 打开入口与登录启动
 
@@ -76,7 +76,7 @@ macOS 使用用户桌面 `.app` 与可选 `~/Library/LaunchAgents`；Windows 使
 
 `launcher_test.py` 验证父进程结束后仍可访问、重复/并发打开、退出后恢复、占用冲突、配置与浏览器失效、入口修复与撤销。Windows 主机上会实际创建并读取 `.lnk`、触发无浏览器启动；其他系统上跳过该实机分支，只验证 Windows 参数生成。`desktop_native_test.py` 在 macOS GUI 会话中真实调用 LaunchServices 和 launchd，使用临时工作台与模拟浏览器、自动清理；这不等于实际注销/重启验收。
 
-GitHub Actions 对 macOS、Windows、Linux 运行隔离测试，[2026-10-30 三系统通过记录](https://github.com/LuKK351/lukk-codex-workbench/actions/runs/40989545973)。CI 的通过记录只覆盖相应测试，不代表所有用户桌面策略、系统登录项设置或整机重启场景均已验证。
+GitHub Actions 对 macOS、Windows、Linux 运行隔离测试，[2026-10-30 三系统通过记录](https://github.com/LuKK351/codex-chat-workbench/actions/runs/40989545973)。CI 的通过记录只覆盖相应测试，不代表所有用户桌面策略、系统登录项设置或整机重启场景均已验证。
 
 系统接口依据：[Windows 快捷方式](https://learn.microsoft.com/en-us/windows/win32/shell/links)、[Windows 启动应用](https://support.microsoft.com/en-us/windows/experience/startup-boot/configure-startup-applications-in-windows)、macOS 本机 `man launchd.plist`（RunAtLoad、AbandonProcessGroup）。
 

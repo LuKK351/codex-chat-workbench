@@ -85,8 +85,8 @@ Windows 通常没有系统 IANA 时区库。先验证 `ZoneInfo` 能读取用户
 PowerShell 中，若已验证 `py -3` 的 Python 与时区依赖可用，可执行以下命令；实际由 Codex 代用户完成，路径改为选定位置：
 
 ```powershell
-py -3 "$env:USERPROFILE\.codex\skills\lukk-codex-workbench\scripts\initialize.py" "$env:USERPROFILE\Codex 工作台" --since 2026-07-28 --until 2026-10-28 --timezone Asia/Shanghai
-py -3 "$env:USERPROFILE\.codex\skills\lukk-codex-workbench\scripts\desktop.py" install "$env:USERPROFILE\Codex 工作台"
+py -3 "$env:USERPROFILE\.codex\skills\codex-chat-workbench\scripts\initialize.py" "$env:USERPROFILE\Codex 工作台" --since 2026-07-28 --until 2026-10-28 --timezone Asia/Shanghai
+py -3 "$env:USERPROFILE\.codex\skills\codex-chat-workbench\scripts\desktop.py" install "$env:USERPROFILE\Codex 工作台"
 py -3 "$env:USERPROFILE\Codex 工作台\scripts\launcher.py" "$env:USERPROFILE\Codex 工作台"
 ```
 

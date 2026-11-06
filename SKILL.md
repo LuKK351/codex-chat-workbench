@@ -1,5 +1,5 @@
 ---
-name: lukk-codex-workbench
+name: codex-chat-workbench
 description: 初始化或更新本地 Codex 对话整理工作台，按事情汇总讨论、保留原文与来源，并按用户要求设置 Codex 定时更新。适用于首次收录、补录历史、手动增量更新和恢复失败批次。
 ---
 

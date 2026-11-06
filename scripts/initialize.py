@@ -19,6 +19,7 @@ def initialize(destination, since, until, timezone, port=8770):
     if destination.exists(): raise ValueError('目标目录已存在；更新现有工作台请使用 prepare/publish')
     source = Path(__file__).resolve().parents[1] / 'assets/template'
     shutil.copytree(source, destination)
+    shutil.copyfile(source.parents[1] / "LICENSE", destination / "LICENSE")
     settings = {'version': 1, 'workbenchId': str(uuid.uuid4()), 'pythonExecutable': sys.executable, 'timezone': timezone, 'initialRange': {'start': since, 'end': until},
                 'port': port, 'url': f'http://127.0.0.1:{port}/', 'sources': ['codex'],
                 'createdAt': dt.datetime.now(zone).isoformat()}

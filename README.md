@@ -82,7 +82,7 @@
 
 ```text
 请安装这个 Skill，并带我完成首次初始化：
-https://github.com/LuKK351/lukk-codex-workbench
+https://github.com/LuKK351/codex-chat-workbench
 ```
 
 ### 2. 选择先整理哪些讨论
@@ -162,7 +162,7 @@ Codex 会让你确认时间范围、保存位置和分类。保存位置与分�
 安装后尚未识别 Skill，可以新建对话或重新打开 Codex，再发：
 
 ```text
-使用 $lukk-codex-workbench，帮我建立对话整理工作台。
+使用 $codex-chat-workbench，帮我建立对话整理工作台。
 ```
 
 先点桌面的“打开 Codex 工作台”，它会自动检查并恢复服务。直接点击浏览器书签需要服务已经运行，可按需开启登录后自动启动。
@@ -173,6 +173,8 @@ Codex 会让你确认时间范围、保存位置和分类。保存位置与分�
 
 ---
 
-[技术说明](docs/technical.md) · [反馈问题](https://github.com/LuKK351/lukk-codex-workbench/issues)
+[技术说明](docs/technical.md) · [反馈问题](https://github.com/LuKK351/codex-chat-workbench/issues)
 
 反馈时请隐去私人对话、个人路径和其他敏感信息。
+
+本项目采用 [MIT 许可证](LICENSE)，版权署名为 LuKK（困困）。
