@@ -65,7 +65,22 @@ def check(root, candidate, review_path):
         has_task = any(t['item'] == iid for t in data['tasks'])
         w.require((row['decisions']['result'] == 'present') == has_decision, '决定检查与候选不一致')
         w.require((row['continuation']['result'] == 'present') == has_task, '接续检查与候选不一致')
+    # A copied recap (possibly wrapped in the same boilerplate) is not an
+    # independent stop-point review. A single recap can legitimately suffice.
+    templates = {}
+    for iid, row in rows.items():
+        if row['continuation']['result'] != 'checked_none':
+            continue
+        reason = ''.join(row['continuation']['reason'].split())
+        summary = ''.join(items[iid]['summary'].split())
+        if summary and summary in reason:
+            prefix, _, suffix = reason.partition(summary)
+            templates.setdefault((prefix, suffix), []).append(iid)
+    for group in templates.values():
+        w.require(len(group) < 2, '多个事项用同一模板复制小结作为无接续依据：' + '、'.join(group) + '。请逐项核对用户目标、已交付内容和最后停点；核实后允许全部为空。')
     warnings = []
+    if affected and not any(t['level'] == '有明确接续' for t in data['tasks']):
+        warnings.append('当前没有明确接续。交付前优先回看近期活跃事项的用户目标与最后交付；有待确认候选也需检查，不为填满页面而新增。')
     placeholders = ('见当日收录的讨论', '用户提出需求或作出修正。', '用户提出要求或反馈。', '助手当时的回复。')
     for iid in affected:
         item = items[iid]

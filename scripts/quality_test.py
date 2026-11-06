@@ -65,6 +65,26 @@ def main():
         result=q.release(root,candidate,path)
         assert result['status']=='published' and not result['quality']['semanticAccuracyVerified']
         assert (candidate/'published.json').exists()
+        # Two completed goals may legitimately yield no tasks. Their stopping
+        # evidence must not be produced by wrapping each recap in boilerplate.
+        second = copy.deepcopy(item)
+        second.update(id='ii', title='比较缓存策略', summary='已经交付策略比较表。')
+        second['nodes'][0]['id'] = 'n2'
+        batch3 = {**batch, 'baseSha256': w.sha((root/'data.json').read_bytes()), 'items':[item,second], 'threads':[]}
+        c3=root/'c3'; w.atomic(root/'b3.json',w.encode(batch3))
+        r3=w.prepare(root,root/'b3.json',c3)
+        v3=copy.deepcopy(review)
+        v3.update(sources=[],candidateSha256=r3['candidateSha256'],batchSha256=w.sha((c3/'batch.json').read_bytes()))
+        v3['items'].append({**copy.deepcopy(v3['items'][0]), 'id':'ii'})
+        v3['items'][1]['continuation']['reason']='只要求交付比较表，最后一条消息已给出表格。'
+        w.atomic(path,w.encode(v3));assert q.check(root,c3,path)['warnings']
+        for prefix in ('', '本次没有确认仍须继续：'):
+            for row, obj in zip(v3['items'], (item, second)):
+                row['continuation']['reason'] = prefix + obj['summary']
+            w.atomic(path,w.encode(v3))
+            try:q.check(root,c3,path)
+            except ValueError as exc:assert '复制小结' in str(exc)
+            else:raise AssertionError('Bulk recap substitution accepted')
         # Task-only update must still require reviewing its owner.
         task={'id':'k','item':'i','node':'n1','thread':'t','sourceTitle':'问答','date':stamp,'title':'继续研究','stop':'待研究','reason':'合成验证','level':'状态待核实'}
         b2={'version':1,'baseSha256':w.sha((root/'data.json').read_bytes()),'provenance':batch['provenance'],'tasks':[task]}
