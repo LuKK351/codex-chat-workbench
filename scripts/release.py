@@ -2,12 +2,28 @@
 """Verify evidence-backed batch review before publishing. Not a semantic judge."""
 import argparse
 import json
+import re
 from pathlib import Path
 import workbench as w
 
 
 def nonempty(value, label):
     w.require(isinstance(value, str) and bool(value.strip()), label + '不能为空')
+
+
+def repeated_quote_titles(nodes):
+    """Detect clusters of previews copied from the start of their own source."""
+    def plain(text):
+        return re.sub(r'[\W_]+', '', text).casefold()
+    hits = 0
+    for n in nodes:
+        title = n['title'].strip()
+        # Accept either plain text or a short speaker/attribution preceding it.
+        variants = [title, re.split(r'[:：「“]', title, maxsplit=1)[-1]]
+        quote = plain(n['quote'])
+        if any(len(t) >= 8 and quote.startswith(t) for t in map(plain, variants)):
+            hits += 1
+    return hits >= 3 and hits * 2 >= len(nodes)
 
 
 def check(root, candidate, review_path):
@@ -84,6 +100,8 @@ def check(root, candidate, review_path):
     placeholders = ('见当日收录的讨论', '用户提出需求或作出修正。', '用户提出要求或反馈。', '助手当时的回复。')
     for iid in affected:
         item = items[iid]
+        if repeated_quote_titles(item['nodes']):
+            warnings.append(iid + ': 多个导航标题直接摘取原话开头，请检查能否分清每段讨论的发现或变化')
         fields = [item['summary']] + [n['event'] for n in item['nodes']]
         fields += [v for k, v in data.get('dailySummaries', {}).items() if k.endswith('|' + iid)]
         if any(p in value for value in fields for p in placeholders):
