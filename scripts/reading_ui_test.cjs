@@ -63,7 +63,7 @@ const rawThread={id:threadId,title:'议题讨论 <写作>',date:node.date,checke
 sandbox.fixture={items:[],legacyItems:[],threads:[rawThread],snapshot:'2026-11-03'};
 vm.runInContext('data=fixture',sandbox);
 sandbox.search({q:'个人写作',range:'any',back:'#tab=all'});
-assert.match(app.innerHTML,/其他原文匹配 · 1 个窗口/);
+assert.match(app.innerHTML,/>对话正文匹配<\/h2>/);
 assert.ok(!app.innerHTML.includes('id="matching-matters"'));
 assert.match(app.innerHTML,/阅读前后文/);
 assert.ok(app.innerHTML.includes(`href="codex://threads/${threadId}"`));
@@ -99,23 +99,27 @@ const ranked=C.searchData(sandbox.fixture,query,undefined,'any');
 assert.deepEqual(ranked.sources.filter(s=>s.titleMatch).map(s=>s.thread.id),[exactThread.id,namedThread.id,scatteredThread.id]);
 assert.equal(ranked.groups.find(g=>g.thing.id==='video').tier,1); // A broad window title cannot promote every topic within it.
 sandbox.search({q:query,range:'any'});
-const nameStart=app.innerHTML.indexOf('<section class="name-results"'),nameEnd=app.innerHTML.indexOf('</section>',nameStart);
-assert.ok(nameStart>=0 && nameStart<app.innerHTML.indexOf('class="result search-group"'));
-const nameHtml=app.innerHTML.slice(nameStart,nameEnd);
-assert.equal((nameHtml.match(/class="source-result-head"/g)||[]).length,3);
-assert.match(nameHtml,/>名称匹配的 Codex 窗口<\/h2>/);
-assert.match(app.innerHTML.slice(nameEnd),/id="matching-matters">相关事情<\/h2>/);
-assert.ok(!app.innerHTML.includes('search-summary'));
-assert.ok(nameHtml.includes('codex://threads/'+threadId));
-assert.ok(nameHtml.includes('href="#thread='+threadId));
-assert.ok(!nameHtml.includes('class="matched-nodes" open')); // Only messages collapse; window links remain visible.
-assert.ok(!app.innerHTML.slice(nameEnd).includes('class="source-result-head"')); // Named windows are not repeated in the lower raw-results section.
-assert.ok(!app.innerHTML.includes('仅在原话中提及'));
+assert.match(app.innerHTML,/>窗口名称匹配<\/h2>/);
+assert.ok(!app.innerHTML.includes('class="result search-group"'));
+assert.ok(app.innerHTML.includes('codex://threads/'+threadId));
+assert.ok(app.innerHTML.includes('message='+quoteNode.messageId)); // Also present in a curated matter.
+sandbox.search({q:query,range:'any',results:'matters'});
+assert.match(app.innerHTML,/>事项标题匹配<\/h2>/);
+assert.match(app.innerHTML,/>事项引用的原话匹配<\/h2>/);
+assert.ok(!app.innerHTML.includes('class="source-result-head"'));
+// A window whose only matching passage is quoted by a matter is still a full-text result.
+sandbox.fixture={items:[quoteThing],threads:[{...namedThread,title:'拍摄讨论'}],snapshot:'2026-11-03'};
+vm.runInContext('data=fixture',sandbox);
+sandbox.search({q:query,range:'any',results:'windows'});
+assert.match(app.innerHTML,/>对话正文匹配<\/h2>/);
+assert.ok(app.innerHTML.includes('message='+quoteNode.messageId));
+sandbox.search({q:query,range:'any',results:'matters'});
+assert.match(app.innerHTML,/>事项引用的原话匹配<\/h2>/);
 // Name-only hits work even with no matching messages or curated matters, including spacing/case.
 sandbox.fixture={items:[],threads:[exactThread],snapshot:'2026-11-03'};
 vm.runInContext('data=fixture',sandbox);
 sandbox.search({q:'ＣＯＤＥＸ对话整理工作台',range:'any'});
-assert.ok(app.innerHTML.includes('class="name-results"'));
+assert.match(app.innerHTML,/>窗口名称匹配<\/h2>/);
 assert.ok(!app.innerHTML.includes('没有找到匹配的内容'));
 assert.equal(C.searchData(sandbox.fixture,query,'2026-11-05T12:00:00+08:00','today').sources.length,0); // Date filters still apply.
 console.log('PASS name-first search ranking, name-only/date scope, reading routes, raw-only search, sticky native shortcut, message targeting, and safe export fallback');

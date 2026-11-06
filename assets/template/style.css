@@ -352,13 +352,22 @@ h1,h2,h3,.node strong,.source-shortcut,.workline,.match-node,.detail-recap {over
 .source-return>.source-open{margin-left:auto;font-size:13px;min-height:36px}
 
 /* Name matches are direct navigation results, visible before topic and text matches. */
-.name-results,.matter-results{margin:24px 0 28px}
-.name-results>h2,.matter-results>h2{font-size:15px;margin:0 0 12px}
+/* Search first selects what opens: a Codex window or a curated matter. */
+.result-choices{display:flex;gap:26px;margin:22px 0 24px;border-bottom:1px solid var(--line)}
+.result-choices a{display:inline-flex;gap:8px;align-items:center;padding:8px 0 12px;font-size:16px;font-weight:600;color:var(--ink);border-bottom:2px solid transparent}
+.result-choices a[aria-current]{color:var(--accent);border-color:currentColor}
+.result-choices span{font-size:12px;font-variant-numeric:tabular-nums;background:var(--light);border-radius:6px;padding:1px 6px}
+.search-section{margin:24px 0 32px}
+.search-section>h2{font-size:15px;margin:0 0 12px}
+.search-section .result{padding:18px 22px}
+.search-section .source-result-head{align-items:center}
+.search-section h3{margin:0}
+.search-section .matched-nodes{margin-top:14px}
+.branch-picker{margin:20px 0 12px;width:max-content;max-width:100%}
+.branch-picker summary{gap:10px;border:1px solid var(--line);background:white}
+.branch-picker summary span{color:var(--muted);font-weight:400}
+.branch-picker .month-menu{display:grid;grid-template-columns:1fr;min-width:230px;width:max-content;max-width:min(90vw,400px)}
 
-.name-results .result{padding:18px 22px}
-.name-results .source-result-head{align-items:center}
-.name-results h3{margin:0}
-.name-results .matched-nodes{margin-top:14px}
 
 .created-threads ul{margin:6px 0 0;padding-inline-start:1.4em}
 .created-threads li+li{margin-top:4px}

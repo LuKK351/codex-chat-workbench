@@ -129,7 +129,7 @@
   let rawCount=0;const sourceGroups=[];
   for(const t of data.threads||[]){
    const all=t.messages.filter((m,i)=>!(t.inheritedPrefix&&i<t.inheritedPrefix.messages)&&matches(m.text,terms));rawCount+=all.length;
-   const messages=all.filter(m=>!represented.has(t.id+':'+m.id)).sort((a,b)=>Number(nearby(b.text,terms))-Number(nearby(a.text,terms))||b.date.localeCompare(a.date));
+   const messages=all.sort((a,b)=>Number(nearby(b.text,terms))-Number(nearby(a.text,terms))||b.date.localeCompare(a.date));
    const name=compact(t.title),query=compact(q);
    const titleRank=query?(name===query?3:name.includes(query)?2:matches(t.title,terms)?1:0):0;
    const titleMatch=titleRank>0;if(messages.length||titleMatch)sourceGroups.push({thread:t,messages,titleMatch,titleRank});
@@ -179,7 +179,7 @@
   const rows=(data.threads||[]).flatMap(t=>t.messages.filter((m,i)=>!(t.inheritedPrefix&&i<t.inheritedPrefix.messages)).map(m=>({thread:t,message:m,text:canonical(m.text)})));
   return index.natural={entries,rows};
  }
- function naturalRecall(data,q,existing,represented){
+ function naturalRecall(data,q,existing){
   const index=searchIndex(data),{entries,rows}=naturalIndex(data),tokens=queryTokens(q);
   if(tokens.length<2)return {groups:[],sources:[],terms:tokens};
   const weights=tokens.map(term=>1+Math.min(3,Math.log((entries.length+1)/(1+entries.filter(e=>e.anchor.includes(term)||e.nodes.some(n=>n.anchor.includes(term))).length))));
@@ -195,10 +195,9 @@
    groups.push({thing:e.thing,tier:0,approx:'按整句中的关键线索匹配',score:value,fields:best?[]:[{label:'小结',text:e.thing.summary||e.thing.recap,node:target?.id}],nodes:best?ranked.slice(0,5):target?[{node:target,evidence:target.quote,score:value}]:[]});
   }
   groups.sort((a,b)=>b.score-a.score||b.thing.date.localeCompare(a.thing.date));
-  const selected=groups.slice(0,6),used=new Set(represented);
-  for(const g of selected)for(const {node:n} of g.nodes)used.add(n.thread+':'+n.messageId);
+  const selected=groups.slice(0,6);
   const sources=new Map();
-  for(const row of rows){if(used.has(row.thread.id+':'+row.message.id))continue;const value=score(row.text);if(!value)continue;if(!sources.has(row.thread.id))sources.set(row.thread.id,{thread:row.thread,messages:[],titleMatch:false,approx:true});sources.get(row.thread.id).messages.push({...row.message,searchScore:value});}
+  for(const row of rows){const value=score(row.text);if(!value)continue;if(!sources.has(row.thread.id))sources.set(row.thread.id,{thread:row.thread,messages:[],titleMatch:false,approx:true});sources.get(row.thread.id).messages.push({...row.message,searchScore:value});}
   for(const s of sources.values())s.messages.sort((a,b)=>b.searchScore-a.searchScore||b.date.localeCompare(a.date));
   return {groups:selected,sources:[...sources.values()].sort((a,b)=>b.messages[0].searchScore-a.messages[0].searchScore),terms:tokens};
  }
@@ -211,17 +210,16 @@
   if(parsed.range&&!text){
    const represented=new Set();const groups=searchIndex(scoped).items.map(t=>{const nodes=[...t.nodes].reverse().map(n=>{represented.add(n.thread+':'+n.messageId);return {node:n,evidence:n.quote,score:1};});return {thing:t,tier:2,score:1,fields:[],nodes};});
    groups.sort((a,b)=>b.thing.date.localeCompare(a.thing.date));
-   result={terms:[],groups,suggestions:[],represented,rawCount:scoped.threads.reduce((n,t)=>n+t.messages.length,0),sources:scoped.threads.map(t=>({thread:t,titleMatch:false,messages:t.messages.filter(m=>!represented.has(t.id+':'+m.id))})).filter(t=>t.messages.length)};
+   result={terms:[],groups,suggestions:[],represented,rawCount:scoped.threads.reduce((n,t)=>n+t.messages.length,0),sources:scoped.threads.map(t=>({thread:t,titleMatch:false,messages:t.messages.filter((m,i)=>i>=(t.inheritedPrefix?.messages||0))})).filter(t=>t.messages.length)};
   }else{
    const exact=exactSearch(scoped,text);result={...exact,suggestions:[...exact.suggestions],sources:[...exact.sources]};
    if(text&&result.groups.filter(g=>g.tier===2).length<3){
-    const recall=naturalRecall(scoped,text,new Set(result.groups.map(g=>g.thing.id)),result.represented);
+    const recall=naturalRecall(scoped,text,new Set(result.groups.map(g=>g.thing.id)));
     const merged=new Map(recall.groups.map(g=>[g.thing.id,g]));for(const g of result.suggestions){const boosted={...g,score:g.score*1.3,nodes:g.nodes.length?g.nodes:(merged.get(g.thing.id)?.nodes||[])};if(!merged.has(g.thing.id)||merged.get(g.thing.id).score<boosted.score)merged.set(g.thing.id,boosted);}
     result.suggestions=[...merged.values()].sort((a,b)=>b.score-a.score||b.thing.date.localeCompare(a.thing.date)).slice(0,6);
     const byThread=new Map(result.sources.map(s=>[s.thread.id,{...s,messages:[...s.messages]}]));
-    const shown=new Set(result.represented);for(const g of result.suggestions)for(const {node:n} of g.nodes)shown.add(n.thread+':'+n.messageId);
     for(const s of recall.sources){if(!byThread.has(s.thread.id))byThread.set(s.thread.id,{...s,messages:[]});const dest=byThread.get(s.thread.id),ids=new Set(dest.messages.map(m=>m.id));for(const m of s.messages)if(!ids.has(m.id))dest.messages.push(m);}
-    result.sources=[...byThread.values()].map(s=>({...s,messages:s.messages.filter(m=>!shown.has(s.thread.id+':'+m.id))})).filter(s=>s.titleMatch||s.messages.length);
+    result.sources=[...byThread.values()];
     result.terms=[...new Set([...result.terms,...recall.terms])];
    }
   }
