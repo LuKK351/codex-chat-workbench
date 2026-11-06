@@ -63,7 +63,8 @@ const rawThread={id:threadId,title:'议题讨论 <写作>',date:node.date,checke
 sandbox.fixture={items:[],legacyItems:[],threads:[rawThread],snapshot:'2026-11-03'};
 vm.runInContext('data=fixture',sandbox);
 sandbox.search({q:'个人写作',range:'any',back:'#tab=all'});
-assert.match(app.innerHTML,/0 件相关事情/);
+assert.match(app.innerHTML,/其他原文匹配 · 1 个窗口/);
+assert.ok(!app.innerHTML.includes('id="matching-matters"'));
 assert.match(app.innerHTML,/阅读前后文/);
 assert.ok(app.innerHTML.includes(`href="codex://threads/${threadId}"`));
 assert.match(app.innerHTML,/message=raw-hit/);
@@ -101,6 +102,10 @@ sandbox.search({q:query,range:'any'});
 const nameStart=app.innerHTML.indexOf('<section class="name-results"'),nameEnd=app.innerHTML.indexOf('</section>',nameStart);
 assert.ok(nameStart>=0 && nameStart<app.innerHTML.indexOf('class="result search-group"'));
 const nameHtml=app.innerHTML.slice(nameStart,nameEnd);
+assert.equal((nameHtml.match(/class="source-result-head"/g)||[]).length,3);
+assert.match(nameHtml,/>名称匹配的 Codex 窗口<\/h2>/);
+assert.match(app.innerHTML.slice(nameEnd),/id="matching-matters">相关事情<\/h2>/);
+assert.ok(!app.innerHTML.includes('search-summary'));
 assert.ok(nameHtml.includes('codex://threads/'+threadId));
 assert.ok(nameHtml.includes('href="#thread='+threadId));
 assert.ok(!nameHtml.includes('class="matched-nodes" open')); // Only messages collapse; window links remain visible.
