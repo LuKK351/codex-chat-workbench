@@ -62,6 +62,26 @@ function readable(text){
   const lines=chunk.split('\n'),out=[];let plain=[];
   const flush=()=>{if(plain.length){let value=plain.join('\n');if(out.at(-1)?.startsWith('<div class="message-table-scroll"'))value=value.replace(/^\n+/,'');out.push(inline(value));plain=[];}};
   for(let i=0;i<lines.length;i++){
+   const directive=C.codexDirective(lines[i]);
+   if(directive){
+    flush();formatted=true;
+    if(directive.kind==='thread'){
+     const ids=[directive.id];
+     while(i+1<lines.length){
+      const next=C.codexDirective(lines[i+1]);
+      if(next?.kind!=='thread')break;
+      ids.push(next.id);i++;
+     }
+     const links=ids.map((id,index)=>{
+      const title=data?.threads?.find(t=>t.id===id)?.title||'打开对话'+(ids.length>1?' '+(index+1):'');
+      return '<li>'+sourceLink(id,title)+'</li>';
+     });
+     out.push('<div class="created-threads"><span class="muted">创建的对话</span><ul>'+links.join('')+'</ul></div>');
+    }else{
+     out.push('<div class="muted">'+esc(directive.label)+'</div>');
+    }
+    continue;
+   }
    const header=cells(lines[i]),rule=i+1<lines.length?cells(lines[i+1]):null;
    if(!header||!rule||header.length!==rule.length||!rule.every(c=>/^:?-{3,}:?$/.test(c))){plain.push(lines[i]);continue;}
    while(plain.at(-1)==='')plain.pop();flush();formatted=true;
@@ -111,7 +131,7 @@ function decisions(t,extra={}){
 function empty(title,text,action={href:link({tab:'all'}),label:'浏览事情总览 →'}){return `<div class="empty"><h2>${title}</h2><p>${text}</p>${action?`<a class="anchor" href="${esc(action.href)}">${esc(action.label)}</a>`:''}</div>`;}
 function background(t){
  const summary=(t.summary||t.recap||'').trim();
- const parts=[t.recap,t.openQuestion,t.status].filter(Boolean).map(x=>x.trim()).filter(x=>x!==summary&&!/^(记录的是当时讨论与完成回执|根据已收录对话整理；完成回执与用户采用分开记录)/.test(x));
+ const parts=[t.recap,t.openQuestion,t.status].filter(Boolean).map(x=>x.trim()).filter(x=>x&&x!==summary&&!/^讨论记录[。.]?$/.test(x)&&!/^(记录的是当时讨论与完成回执|根据已收录对话整理；完成回执与用户采用分开记录)/.test(x));
  const unique=[...new Set(parts)];return unique.length?`<details class="background"><summary>背景与补充说明</summary>${unique.map(x=>`<p>${esc(x)}</p>`).join('')}</details>`:'';
 }
 function contextPanel(n){const messages=(n.context||[]).filter(m=>m.id!==n.messageId);return messages.length?`<details class="context-details"><summary>查看相邻消息 · ${messages.length} 条</summary>${messages.map(m=>`<div class="context-message"><label>${m.role==='user'?'你的原话':'Codex 当时回复'} · ${esc(C.date(m.date))}</label><div class="message-body">${readable(m.text)}</div></div>`).join('')}</details>`:'';}

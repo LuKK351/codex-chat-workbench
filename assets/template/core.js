@@ -239,7 +239,20 @@
   ranges.sort((a,b)=>a[0]-b[0]);const merged=[];for(const r of ranges){const last=merged.at(-1);if(last&&r[0]<=last[1])last[1]=Math.max(last[1],r[1]);else merged.push(r);}
   return merged.map(([a,b])=>(a?'…':'')+value.slice(a,b)+(b<value.length?'…':'')).join(' … ');
  }
- function plainExcerpt(text){return String(text||'').replace(/!\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/\[([^\]]+)\]\((?:<[^>]*>|[^)])*\)/g,'$1').replace(/(?:\/Users\/|\/private\/)[^\s<>]+/g,'[本地文件路径]').replace(/https?:\/\/[^\s<>]+/g,'[链接]').replace(/\*\*|__|`+/g,'').replace(/^\s{0,3}#{1,6}\s+/gm,'').replace(/\s+/g,' ').trim();}
+ // Only interpret complete, recognized Codex display directives.
+ function codexDirective(line){
+  if(!line.includes('::'))return null;
+  const text=line.replace(/^ {0,3}/,'').trimEnd();
+  const thread=/^::created-thread\{threadId="([\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12})"\s*\}$/i.exec(text);
+  if(thread)return {kind:'thread',id:thread[1],label:'创建的对话'};
+  if(/^::git-commit\{cwd="[^"\r\n]+"\s*\}$/.test(text))return {kind:'commit',label:'Git 提交'};
+  return null;
+ }
+ function directivePreview(text){
+  if(!text.includes('::'))return text;
+  return text.replace(/^ {0,3}::[^\n]*$/gm,line=>codexDirective(line)?.label||line);
+ }
+ function plainExcerpt(text){return directivePreview(String(text||'')).replace(/!\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/\[([^\]]+)\]\((?:<[^>]*>|[^)])*\)/g,'$1').replace(/(?:\/Users\/|\/private\/)[^\s<>]+/g,'[本地文件路径]').replace(/https?:\/\/[^\s<>]+/g,'[链接]').replace(/\*\*|__|`+/g,'').replace(/^\s{0,3}#{1,6}\s+/gm,'').replace(/\s+/g,' ').trim();}
  function eventSummary(n){const text=String(n.event||'').replace(/[；，。]?具体说法见下方原话[。]?/g,'').trim();return text.replace(/[。；]$/,'')===String(n.title).replace(/[。；]$/,'')?'':text;}
- const api={searchCoverage,setTimeZone,asDate,dayKey,age,relative,inRange,rangeBounds,date,clock,dateTime,timeZoneLabel,words,matches,nearby,parseQuery,queryTokens,dailyGroups,searchData,excerpts,plainExcerpt,eventSummary};if(typeof module==='object')module.exports=api;else root.Workbench=api;
+ const api={searchCoverage,setTimeZone,asDate,dayKey,age,relative,inRange,rangeBounds,date,clock,dateTime,timeZoneLabel,words,matches,nearby,parseQuery,queryTokens,dailyGroups,searchData,excerpts,plainExcerpt,codexDirective,eventSummary};if(typeof module==='object')module.exports=api;else root.Workbench=api;
 })(typeof window!=='undefined'?window:globalThis);

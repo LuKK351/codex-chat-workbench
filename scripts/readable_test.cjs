@@ -5,9 +5,9 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'../assets/template/app.js'),'utf8');
-const sandbox={};
+const sandbox={C:require('../assets/template/core.js'),data:{threads:[]}};
 vm.createContext(sandbox);
-vm.runInContext(source.slice(source.indexOf('const esc='),source.indexOf('const state='))+source.slice(source.indexOf('function readable('),source.indexOf('function sourceLink(')),sandbox);
+vm.runInContext(source.slice(source.indexOf('const esc='),source.indexOf('const state='))+source.slice(source.indexOf('function readable('),source.indexOf('function sourceNames(')),sandbox);
 const render=text=>sandbox.readable(text);
 const table='| 顺序 | 访客看到的内容 | 发现 |\n| --- | :---: | ---: |\n| 1 | **体验** | 有限时间 |\n| 2 | 交会 | 具体的人 |';
 let html=render('前文\n\n'+table+'\n\n后文');
@@ -31,3 +31,15 @@ assert.match(render('| A | B |\n| --- | --- |\n| [来源](https://example.com) |
 assert.match(render('`**literal**`'),/<code>\*\*literal\*\*<\/code>/);
 assert.equal((render(table+'\n\n'+table).match(/<table /g)||[]).length,2);
 console.log('PASS Markdown table rows, inline formatting, alignment, escaped/code pipes, fenced code, malformed input, source preservation and HTML/URL safety');
+
+const threadId='00000000-0000-4000-8000-000000000001';
+const marker='::created-thread{threadId="'+threadId+'"}';
+sandbox.data.threads.push({id:threadId,title:'测试 <窗口>'});
+const shown=render('前文\n'+marker+'\n'+marker+'\n后文').split('<details');
+assert.match(shown[0],/创建的对话/);assert.ok(shown[0].includes('测试 &lt;窗口&gt;'));
+assert.equal(shown[0].split('codex://threads/'+threadId).length-1,2);
+assert.ok(!shown[0].includes('::created-thread'));assert.ok(shown[1].includes('::created-thread'));
+assert.ok(render('```text\n'+marker+'\n```').includes('<pre><code>::created-thread'));
+assert.ok(!render('::created-thread{threadId="javascript:bad"}').includes('href='));
+assert.equal(sandbox.C.plainExcerpt('前文\n'+marker+'\n后文'),'前文 创建的对话 后文');
+assert.equal(sandbox.C.plainExcerpt('::git-commit{cwd="/example"}'),'Git 提交');

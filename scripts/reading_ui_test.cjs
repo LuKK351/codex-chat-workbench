@@ -17,6 +17,8 @@ assert.equal(sandbox.matchEvidence({title:'确认 V03'},'讨论小结：确认 V
 assert.equal(sandbox.matchEvidence({title:'确认 V03'},'讨论标题：确认 V03 后的封面'),'讨论标题：确认 V03 后的封面');
 assert.match(sandbox.background({summary:'当前进展',recap:'历史背景',status:'助手报告，未独立核验'}),/历史背景.*助手报告，未独立核验/);
 assert.equal(sandbox.background({summary:'当前进展',status:'当前进展'}),'');
+assert.equal(sandbox.background({summary:'正文',recap:'',openQuestion:'   ',status:'讨论记录'}),'');
+assert.match(sandbox.background({summary:'正文',openQuestion:'尚待核实的例子',status:'讨论记录'}),/尚待核实的例子/);
 const item={id:'matter',title:'事项',nodes:[{id:'a'},{id:'b'},{id:'c'}],decisions:[
  {node:'a',text:'older',label:'用户要求',date:'2026-10-21T08:00:00+08:00'},
  {node:'b',text:'newest',label:'助手报告',date:'2026-10-21T01:00:00Z'},

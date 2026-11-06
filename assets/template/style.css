@@ -359,3 +359,6 @@ h1,h2,h3,.node strong,.source-shortcut,.workline,.match-node,.detail-recap {over
 .name-results .source-result-head{align-items:center}
 .name-results h3{margin:0}
 .name-results .matched-nodes{margin-top:14px}
+
+.created-threads ul{margin:6px 0 0;padding-inline-start:1.4em}
+.created-threads li+li{margin-top:4px}
